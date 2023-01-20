@@ -3,39 +3,59 @@ import java.net.URI;
 import java.util.*;
 
 class Handler implements URLHandler {
-    // The one bit of state on the server: a number that will be manipulated by
-    // various requests.
-    int num = 0;
-    ArrayList<String> str = new ArrayList<String>(); 
-    String result = "";
-
+    ArrayList<String> str = new ArrayList<String>();
+    ArrayList<String> temp = new ArrayList<String>();
+    StringBuilder result = new StringBuilder();
+    StringBuilder rslt = new StringBuilder();
+    int index,len  = 0;
+    String mid = " ";
 
     public String handleRequest(URI url) {
-        if (url.getPath().equals("/")) {
-            return String.format("Gwendolyn's Number: %d", num);
-        } else if (url.getPath().equals("/increment")) {
-            num += 1;
-            return String.format("Number incremented!");
+        if(url.getPath().equals("/")) {
+            return result.toString();
         }
-        else {
-            System.out.println("Path: " + url.getPath());
-            if (url.getPath().contains("/add")) {
-                String[] parameters = url.getQuery().split("=");
-                if (parameters[0].equals("count")) {
-                    num += Integer.parseInt(parameters[1]);
-                    return String.format("Number increased by %s! It's now %d", parameters[1], num);
+        else if (url.getPath().contains("/add")) {
+            String[] parameters = url.getQuery().split("=");
+            if(parameters[0].equals("s")) {
+                result.delete(0, result.length());
+                for (int i = 1; i < parameters.length; i++) {
+                    str.add(parameters[i]);
                 }
-                if (parameters[0].equals("str")) {
-                    for (int i = 1; i < parameters.length; i++) {
-                        str.add(parameters[i]);
-                    } 
-                    for (int i = 0; i < str.size(); i++) {
-                        
-                    } 
-                    return str.toString();
+                for (int i = 0; i < str.size(); i++) {
+                    result.append(str.get(i));
+                    result.append(" ");
+                }
+                return result.toString();
+            }
+            else {
+                return "404 Not Found!";
+            }
+        }
+        else if (url.getPath().contains("/search")) {
+            String[] parameters = url.getQuery().split("=");
+            if(parameters[0].equals("s")) {
+                rslt.delete(0, rslt.length());
+                for (int i = 0; i < str.size(); i++) {
+                    if (str.get(i).contains(parameters[1])) {
+                        rslt.append(str.get(i));
+                        rslt.append(" ");
+                    }
+                }
+                if (rslt.length() == 0) {
+                    return "Sorry; not found :(";
+                }
+                else {
+                    return rslt.toString();
                 }
             }
+            else{
+                return "404 Not Found!";
+            }
+        }
+        else {
             return "404 Not Found!";
+        }
+            
         }
     }
 
@@ -50,5 +70,4 @@ class SearchEngine {
 
         Server.start(port, new Handler());
     }
-}
 }
